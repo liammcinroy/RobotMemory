@@ -28,8 +28,6 @@ class RobotMemory:
 
     Plot = [[]]
 
-    Speed = 0.0
-
     MidpointX = 0
 
     MidpointY = 0
@@ -39,105 +37,136 @@ class RobotMemory:
     Y = 0
 
     TowardsX = 0
-
     TowardsY = 0
 
     Scale = 0.0
 
-    def __init__ (com = 3, length = 250, height = 250, speed = 0.5, scale = 0.5, lookX = 0, lookY = 1):
+    #initialize robot, and create memory
 
-        Plot = [[0 for x in xrange(length)] for x in xrange(height)]
+    def __init__ (self, comPort = 3, width = 250, height = 250, speed = 0.5, scale = 0.5, lookX = 0, lookY = 1):
 
-        Speed = speed
+        self.Speed = speed
 
-        Scale = scale
+        self.Scale = scale
 
-        TowardsX = lookX
+        self.TowardsX = lookX
 
-        TowardsY = lookY
+        self.TowardsY = lookY
+        self.MidpointX = width / 2
+        self.MidpointY = height / 2
+        multiplyBy = (int)(1.0 / scale)
+        self.Plot = [[0] * width * multiplyBy] * height * multiplyBy
+        self.MidpointX *= multiplyBy
+        self.MidpointY *= multiplyBy
 
-        #Myro.init("COM" + com)
+        #Myro.init("COM" + comPort)
+
+    #set midpoint, and current coordinates
+
+    def Start(self, x, y):
+
+        self.X = x + self.MidpointX
+
+        self.Y = y + self.MidpointY
+        self.TowardsX += self.MidpointX
+        self.TowardsY += self.MidpointY
 
 
-    def Start(x, y):
+    #Turn a specified degrees
 
-        MidpointX = x
+    def Turn(self, degrees, left):
+        #3 = 1.5s/0.5speed = 90 degrees
 
-        MidpointY = y
-
-        X = MidpointX
-
-        Y = MidpointY
-
-
-
-    def Turn(degrees, left):
-
-        time90 = 3 * abs(Speed)
+        time90 = 3 * abs(self.Speed)
 
         time = Time90 / abs(degrees)
 
         if (left == 1):
 
-            Myro.robot.turnLeft(time, abs(Speed))
+            Myro.robot.turnLeft(time, abs(self.Speed))
 
         else:
 
-            Myro.robot.turnRight(time, abs(Speed))
+            Myro.robot.turnRight(time, abs(self.Speed))
+        #apply rotation matrix
 
-        TowardsX = TowardsX * cos(degrees) + TowardsY * sin(degrees)
+        self.TowardsX = self.TowardsX * cos(degrees) + self.TowardsY * sin(degrees)
 
-        TowardsY = TowardsX * -sin(degrees) + TowardsY * sin(degrees)
+        self.TowardsY = self.TowardsX * -sin(degrees) + self.TowardsY * sin(degrees)
 
 
 
-    def GoForward(duration):
+    def GoForward(self, duration):
+        if (self.TowardsX - self.X == 0):
+            Myro.robot.motors(self.Speed, self.Speed)
+            Myro.wait(abs(duration))
+            Myro.robot.stop()
+            #get the amount of points forward
+            divisible = (int) (duration / self.Scale)
+            #add them to the direction
+            self.TowardsY += divisible
+            tempY = self.Y
+            for y in xrange(self.Y, divisible + tempY):
+                if (y % self.Scale == 0):
+                    self.Plot[(int) (self.X)][y] = 1
+            return
+        #calc slope
 
-        slope = (TowardsY - Y) / (TowardsX - X)
+        slope = (self.TowardsY - self.Y) / (self.TowardsX - self.X)
 
-        tempX = X
+        tempX = self.X
 
-        tempY = Y
+        tempY = self.Y
+        #go forward
 
-        TowardsX += duration
+        Myro.robot.motors(self.Speed, self.Speed)
 
-        TowardsY += duration
+        Myro.wait(abs(duration))
+        Myro.robot.stop()
+        #get the amount of points forward
 
-        Myro.robot.motors(Speed, Speed)
-
-        wait(duration)
-
-        divisible = duration / Scale
+        divisible = duration / self.Scale
+        #add them to the direction
+        self.TowardsX += divisible
+        self.TowardsY += divisible
 
         Xs = []
 
         Ys = []
+        tempX = self.X
 
-        for x in xrange(X, divisible):
+        for x in xrange(self.X, divisible + tempX):
+            #find out if it is a plottable point
 
-            if (slope * x + X % Scale == 0):
+            if ((slope * (x - self.X) + self.Y) % self.Scale == 0.0):
 
                 Xs.append(x)
 
-                Ys.append(slope * x + X)
+                Ys.append((int)((slope * (x - self.X)) + self.Y))
+        #Plot the points
 
-        for x in xrange(len(Xs)):
+        for x in xrange(0, len(Xs)):
 
-            for y in xrange(len(Ys)):
+            for y in xrange(0, len(Ys)):
 
-                if (Plot[Xs[x]][Ys[y]] == 0):
+                if (self.Plot[Xs[x]][Ys[y]] == 0):
 
-                    Plot[Xs[x]][Ys[y]] = 1
+                    self.Plot[Xs[x]][Ys[y]] = 1
 
-        X += divisible
+        self.X += divisible
 
-        Y += divisible
+        self.Y += divisible
 
 
 
-sim = Myro.Simulation("test", 250, 250, Myro.Color("White"))
+sim = Myro.Simulation("test", 25, 25, Myro.Color("White"))
 r = Myro.makeRobot("SimScribbler", sim)
-r.setPose(125, 125, -90)
-mem = RobotMemory()
-mem.Start(125, 125)
+r.setPose(12, 12, -90)
+mem = RobotMemory(3, 25, 25, 0.5, 0.5, 0, 1)
+mem.Start(0, 0)
 mem.GoForward(1)
+#for x in xrange(0, len(mem.Plot)):
+#    for y in xrange(0, len(mem.Plot)):
+#        if (mem.Plot[x][y] == 1 or mem.Plot[x][y] == 0):
+#            print(mem.Plot[x][y])
+print (mem.Plot)
