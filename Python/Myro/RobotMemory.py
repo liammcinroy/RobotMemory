@@ -126,6 +126,7 @@ class RobotMemory:
         #get the amount of points forward
 
         divisible = duration / self.Scale
+        print (divisible)
         #add them to the direction
         self.TowardsX += divisible
         self.TowardsY += divisible
@@ -145,28 +146,27 @@ class RobotMemory:
                 Ys.append((int)((slope * (x - self.X)) + self.Y))
         #Plot the points
 
-        for x in xrange(0, len(Xs)):
+        for i in xrange(0, len(Xs)):
 
-            for y in xrange(0, len(Ys)):
+            for j in xrange(0, len(Ys)):
 
-                if (self.Plot[Xs[x]][Ys[y]] == 0):
+                if (self.Plot[Xs[i]][Ys[j]] == 0):
 
-                    self.Plot[Xs[x]][Ys[y]] = 1
+                    self.Plot[Xs[i]][Ys[j]] = 1
 
         self.X += divisible
 
         self.Y += divisible
+        print(Xs)
+        print(Ys)
 
 
+print ("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n")
 
 sim = Myro.Simulation("test", 25, 25, Myro.Color("White"))
 r = Myro.makeRobot("SimScribbler", sim)
 r.setPose(12, 12, -90)
-mem = RobotMemory(3, 25, 25, 0.5, 0.5, 0, 1)
+mem = RobotMemory(3, 25, 25, 0.5, 0.5, 1, 1)
 mem.Start(0, 0)
 mem.GoForward(1)
-#for x in xrange(0, len(mem.Plot)):
-#    for y in xrange(0, len(mem.Plot)):
-#        if (mem.Plot[x][y] == 1 or mem.Plot[x][y] == 0):
-#            print(mem.Plot[x][y])
 print (mem.Plot)
