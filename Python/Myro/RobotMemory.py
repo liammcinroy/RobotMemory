@@ -18,10 +18,11 @@
 
 #-------------------------------------------------------------------------------
 
+from __future__ import division
+
 import Myro
 
 from math import *
-
 
 
 class RobotMemory:
@@ -37,6 +38,7 @@ class RobotMemory:
     Y = 0
 
     TowardsX = 0
+    
     TowardsY = 0
 
     Scale = 0.0
@@ -52,11 +54,17 @@ class RobotMemory:
         self.TowardsX = lookX
 
         self.TowardsY = lookY
+        
         self.MidpointX = width / 2
+        
         self.MidpointY = height / 2
+        
         multiplyBy = (int)(1.0 / scale)
+        
         self.Plot = [[0] * width * multiplyBy] * height * multiplyBy
+        
         self.MidpointX *= multiplyBy
+        
         self.MidpointY *= multiplyBy
 
         #Myro.init("COM" + comPort)
@@ -68,13 +76,16 @@ class RobotMemory:
         self.X = x + self.MidpointX
 
         self.Y = y + self.MidpointY
+        
         self.TowardsX += self.MidpointX
+        
         self.TowardsY += self.MidpointY
 
 
     #Turn a specified degrees
 
     def Turn(self, degrees, left):
+        
         #3 = 1.5s/0.5speed = 90 degrees
 
         time90 = 3 * abs(self.Speed)
@@ -97,19 +108,33 @@ class RobotMemory:
 
 
     def GoForward(self, duration):
+        
         if (self.TowardsX - self.X == 0):
+            
             Myro.robot.motors(self.Speed, self.Speed)
+            
             Myro.wait(abs(duration))
+            
             Myro.robot.stop()
+            
             #get the amount of points forward
-            divisible = (int) (duration / self.Scale)
+            
+            divisible = duration // self.Scale
+            
             #add them to the direction
+            
             self.TowardsY += divisible
+            
             tempY = self.Y
+            
             for y in xrange(self.Y, divisible + tempY):
+                
                 if (y % self.Scale == 0):
+                    
                     self.Plot[(int) (self.X)][y] = 1
+                    
             return
+        
         #calc slope
 
         slope = (self.TowardsY - self.Y) / (self.TowardsX - self.X)
@@ -117,29 +142,32 @@ class RobotMemory:
         tempX = self.X
 
         tempY = self.Y
+        
         #go forward
 
         Myro.robot.motors(self.Speed, self.Speed)
 
         Myro.wait(abs(duration))
+        
         Myro.robot.stop()
         #get the amount of points forward
 
         divisible = duration / self.Scale
-        print (divisible)
+        
         #add them to the direction
+        
         self.TowardsX += divisible
+        
         self.TowardsY += divisible
 
         Xs = []
 
         Ys = []
-        tempX = self.X
 
-        for x in xrange(self.X, divisible + tempX):
+        for x in xrange(self.X, tempX + divisible):
             #find out if it is a plottable point
 
-            if ((slope * (x - self.X) + self.Y) % self.Scale == 0.0):
+            if (((slope * (x - self.X)) + self.Y) % self.Scale == 0.0):
 
                 Xs.append(x)
 
@@ -157,16 +185,19 @@ class RobotMemory:
         self.X += divisible
 
         self.Y += divisible
-        print(Xs)
-        print(Ys)
 
 
 print ("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n")
 
-sim = Myro.Simulation("test", 25, 25, Myro.Color("White"))
-r = Myro.makeRobot("SimScribbler", sim)
-r.setPose(12, 12, -90)
+#sim = Myro.Simulation("test", 25, 25, Myro.Color("White"))
+
+#r = Myro.makeRobot("SimScribbler", sim)
+
+#r.setPose(12, 12, -90)
 mem = RobotMemory(3, 25, 25, 0.5, 0.5, 1, 1)
+
 mem.Start(0, 0)
+
 mem.GoForward(1)
+
 print (mem.Plot)
