@@ -55,7 +55,7 @@ class RobotMemory:
         self.MidpointX = width / 2
         self.MidpointY = height / 2
         multiplyBy = (int)(1.0 / scale)
-        self.Plot = [[0] * width * multiplyBy] * height * multiplyBy
+        self.Plot = [[0] * width * multiplyBy for col in range(height * multiplyBy)]
         self.MidpointX *= multiplyBy
         self.MidpointY *= multiplyBy
 
@@ -70,6 +70,7 @@ class RobotMemory:
         self.Y = y + self.MidpointY
         self.TowardsX += self.MidpointX
         self.TowardsY += self.MidpointY
+        self.Plot[(int) (floor(self.X))][(int) (floor(self.Y))] = 1
 
 
     #Turn a specified degrees
@@ -79,7 +80,7 @@ class RobotMemory:
 
         time90 = 3 * abs(self.Speed)
 
-        time = Time90 / abs(degrees)
+        time = time90 / abs(degrees)
 
         if (left == 1):
 
@@ -162,5 +163,7 @@ r = Myro.makeRobot("SimScribbler", sim)
 r.setPose(12, 12, -90)
 mem = RobotMemory(3, 5, 5, 0.5, 0.5, 1, 1)
 mem.Start(0, 0)
+mem.GoForward(2)
+mem.Turn(-45, 1)
 mem.GoForward(2)
 print (mem.Plot)
