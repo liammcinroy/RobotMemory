@@ -42,20 +42,23 @@ class RobotMemory:
 
     Plot = [[]]
 
-    MidpointX = 0
-
-    MidpointY = 0
-
     X = 0
 
     Y = 0
 
-    TowardsX = 0
+    __MidpointX = 0
 
-    TowardsY = 0
+    __MidpointY = 0
 
-    Scale = 0.0
+    __X = 0
 
+    __X = 0
+
+    __TowardsX = 0
+
+    __TowardsY = 0
+
+    __Scale = 0.0
 
 
     #initialize robot, and create memory
@@ -66,43 +69,44 @@ class RobotMemory:
 
         self.Speed = speed
 
-        self.Scale = scale
+        self.__Scale = scale
 
-        self.TowardsX = lookX
+        self.__TowardsX = lookX
 
-        self.TowardsY = lookY
+        self.__TowardsY = lookY
 
-        self.MidpointX = width / 2
+        self.__MidpointX = width / 2
 
-        self.MidpointY = height / 2
+        self.__MidpointY = height / 2
 
         multiplyBy = (int)(1.0 / scale)
 
         self.Plot = [[0] * width * multiplyBy for col in range(height * multiplyBy)]
 
-        self.MidpointX *= multiplyBy
+        self.__MidpointX *= multiplyBy
 
-        self.MidpointY *= multiplyBy
+        self.__MidpointY *= multiplyBy
 
         #Myro.init("COM" + comPort)
-
 
 
     #set midpoint, and current coordinates
 
     def Start(self, x, y):
 
-        self.X = x + self.MidpointX
+        self.__X = x + self.__MidpointX
 
-        self.Y = y + self.MidpointY
+        self.__Y = y + self.__MidpointY
 
-        self.TowardsX += self.MidpointX
+        self.__TowardsX += self.__MidpointX
 
-        self.TowardsY += self.MidpointY
+        self.__TowardsY += self.__MidpointY
 
-        self.Plot[(int) (floor(self.X))][(int) (floor(self.Y))] = 1
+        self.Plot[(int) (floor(self.__X))][(int) (floor(self.__Y))] = 1
 
+     self.X = x
 
+     self.Y = y
 
 
 
@@ -116,18 +120,14 @@ class RobotMemory:
 
         time = time90 / abs(degrees)
 
-
-
         if (left == 1):
 
             Myro.robot.turnLeft(time, abs(self.Speed))
 
 
-
         else:
 
             Myro.robot.turnRight(time, abs(self.Speed))
-
 
 
         #get rotation values
@@ -139,28 +139,25 @@ class RobotMemory:
         cosa = cos(degrees)
 
 
-
         #origin points
 
-        pX = self.TowardsX - self.X
+        pX = self.__TowardsX - self.__X
 
-        pY = self.TowardsY - self.Y
-
+        pY = self.__TowardsY - self.__Y
 
 
         #apply rotation
 
-        self.TowardsX = (cosa * pX - sina * pY) + self.X
+        self.__TowardsX = (cosa * pX - sina * pY) + self.__X
 
-        self.TowardsY = (sina * pX + cosa * pY) + self.Y
-
+        self.__TowardsY = (sina * pX + cosa * pY) + self.__Y
 
 
     def GoForward(self, duration):
 
         #if line is up and down
 
-        if (self.TowardsX - self.X == 0):
+        if (self.__TowardsX - self.__X == 0):
 
             #go forward
 
@@ -171,40 +168,36 @@ class RobotMemory:
             Myro.robot.stop()
 
 
-
             #get the amount of points forward
 
-            divisible = duration // self.Scale
-
+            divisible = duration // self.__Scale
 
 
             #add them to the direction
 
-            self.TowardsY += divisible
+            self.__TowardsY += divisible
 
-            tempY = self.Y
+            tempY = self.__Y
 
 
+            for y in xrange(self.__Y, divisible + tempY):
 
-            for y in xrange(self.Y, divisible + tempY):
+                if (y % self.__Scale == 0):
 
-                if (y % self.Scale == 0):
+                    self.Plot[(int) (self.__X)][y] = 1
 
-                    self.Plot[(int) (self.X)][y] = 1
-            self.Y += divisible
+            self.__Y += divisible
 
             return
 
 
-
         #calc slope
 
-        slope = (self.TowardsY - self.Y) / (self.TowardsX - self.X)
+        slope = (self.__TowardsY - self.__Y) / (self.__TowardsX - self.__X)
 
-        tempX = self.X
+        tempX = self.__X
 
-        tempY = self.Y
-
+        tempY = self.__Y
 
 
         #go forward
@@ -216,19 +209,16 @@ class RobotMemory:
         Myro.robot.stop()
 
 
-
         #get the amount of points forward
 
-        divisible = duration / self.Scale
-
+        divisible = duration / self.__Scale
 
 
         #add them to the direction
 
-        self.TowardsX += divisible
+        self.__TowardsX += divisible
 
-        self.TowardsY += divisible
-
+        self.__TowardsY += divisible
 
 
         Xs = []
@@ -236,16 +226,15 @@ class RobotMemory:
         Ys = []
 
 
-
-        for x in xrange(self.X, (tempX + divisible)):
+        for x in xrange(self.__X, (tempX + divisible)):
 
             #find out if it is a plottable point
 
-            if (((slope * (x - self.X)) + self.Y) % self.Scale == 0.0):
+            if (((slope * (x - self.__X)) + self.__Y) % self.__Scale == 0.0):
 
                 Xs.append(x)
 
-                Ys.append((int)((slope * (x - self.X)) + self.Y))
+                Ys.append((int)((slope * (x - self.__X)) + self.__Y))
 
         #Plot the points
 
@@ -256,11 +245,24 @@ class RobotMemory:
                 self.Plot[Xs[i]][Ys[i]] = 1
 
 
-        self.X = Xs[len(Xs) - 1]
+        self.__X = Xs[len(Xs) - 1]
 
-        self.Y = Ys[len(Ys) - 1]
+        self.__Y = Ys[len(Ys) - 1]
+
+    def GetPosition(self):
+
+        return [self.X, self.Y]
 
 
+    def GetSlope(self):
+
+        if (self.__TowardsX - self.__X == 0):
+
+            return float("nan")
+
+        else:
+
+            return (self.__TowardsY - self.__Y) / (self.__TowardsX - self.__X)
 
 
 
