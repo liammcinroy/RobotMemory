@@ -52,7 +52,7 @@ class RobotMemory:
 
     __X = 0
 
-    __X = 0
+    __Y = 0
 
     __TowardsX = 0
 
@@ -104,15 +104,15 @@ class RobotMemory:
 
         self.Plot[(int) (floor(self.__X))][(int) (floor(self.__Y))] = 1
 
-     self.X = x
+        self.X = x
 
-     self.Y = y
+        self.Y = y
 
 
 
     #Turn a specified degrees
 
-    def Turn(self, degrees, left):
+    def Turn(self, degrees):
 
         #3 = 1.5s/0.5speed = 90 degrees
 
@@ -120,7 +120,16 @@ class RobotMemory:
 
         time = time90 / abs(degrees)
 
+        left = 0
+
+        if (degrees >= 0):
+
+            left = 1
+
+
         if (left == 1):
+
+            degrees += 90
 
             Myro.robot.turnLeft(time, abs(self.Speed))
 
@@ -147,6 +156,17 @@ class RobotMemory:
 
 
         #apply rotation
+
+        if (left == 0):
+
+            #reflect across X axis
+
+            self.__TowardsX = -(cosa * pX - sina * pY) + self.__X
+
+            self.__TowardsY = (sina * pX + cosa * pY) + self.__Y
+
+            return
+
 
         self.__TowardsX = (cosa * pX - sina * pY) + self.__X
 
@@ -188,6 +208,8 @@ class RobotMemory:
 
             self.__Y += divisible
 
+            self.Y += divisible
+
             return
 
 
@@ -211,7 +233,7 @@ class RobotMemory:
 
         #get the amount of points forward
 
-        divisible = duration / self.__Scale
+        divisible = duration // self.__Scale
 
 
         #add them to the direction
@@ -226,28 +248,56 @@ class RobotMemory:
         Ys = []
 
 
-        for x in xrange(self.__X, (tempX + divisible)):
+        if (slope >= 0):
 
-            #find out if it is a plottable point
+            #positive slope
 
-            if (((slope * (x - self.__X)) + self.__Y) % self.__Scale == 0.0):
+            for x in xrange(self.__X, (tempX + divisible)):
 
-                Xs.append(x)
+                #find out if it is a plottable point
 
-                Ys.append((int)((slope * (x - self.__X)) + self.__Y))
+                if (((slope * (x - self.__X)) + self.__Y) % self.__Scale == 0.0):
+
+                    Xs.append(x)
+
+                    Ys.append((int)((slope * (x - self.__X)) + self.__Y))
+
+        else:
+
+            #negative slope
+
+            for x in xrange((tempX - divisible), self.__X):
+
+                #find out if it is a plottable point
+
+                if (((slope * (x - self.__X)) + self.__Y) % self.__Scale == 0.0):
+
+                    Xs.append(x)
+
+                    Ys.append((int)((slope * (x - self.__X)) + self.__Y))
+
 
         #Plot the points
 
         for i in xrange(0, len(Xs)):
 
-            if (self.Plot[Xs[i]][Ys[i]] == 0):
-
                 self.Plot[Xs[i]][Ys[i]] = 1
 
+
+        diffX = Xs[len(Xs) - 1] - self.__X
+
+        diffY = Ys[len(Ys) - 1] - self.__X
+
+        multiplyBy = 1.0 / self.__Scale
 
         self.__X = Xs[len(Xs) - 1]
 
         self.__Y = Ys[len(Ys) - 1]
+
+        self.X += diffX * multiplyBy
+
+        self.Y += diffY * multiplyBy
+
 
     def GetPosition(self):
 
@@ -278,10 +328,16 @@ mem = RobotMemory(3, 20, 20, 1, 1, 0, 1)
 
 mem.Start(0, 0)
 
+print (mem.GetPosition())
+
 mem.GoForward(2)
 
-mem.Turn(-45, 1)
+print (mem.GetPosition())
+
+mem.Turn(-45)
 
 mem.GoForward(3)
+
+print (mem.GetPosition())
 
 print (mem.Plot[::-1])
