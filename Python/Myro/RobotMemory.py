@@ -17,19 +17,15 @@ class RobotMemory:
     Plot = [[]]
 
     X = 0
-
     Y = 0
 
     __MidpointX = 0
-
     __MidpointY = 0
 
     __X = 0
-
     __Y = 0
 
     __TowardsX = 0
-
     __TowardsY = 0
 
     __Scale = 0.0
@@ -56,6 +52,14 @@ class RobotMemory:
 
         Myro.init("COM" + str(comPort))
 
+    #Expands the array
+    def ExpandPlot(self, x, y):
+        for i in xrange(x):
+            for i2 in xrange(x):
+                self.Plot[x].append(0)
+        for j in xrange(y):
+            addArray = [0] * ((self.__MidpointY  + y / self.__Scale) / self.__Scale)
+            self.Plot.append(addArray)
 
     #set midpoint, and current coordinates
     def Start(self, x, y):
@@ -127,13 +131,19 @@ class RobotMemory:
             self.__TowardsY += divisible
             tempY = self.__Y
 
+            #add them to plot
             for y in xrange(self.__Y + self.__Scale, divisible + tempY + self.__Scale):
                 if (y % self.__Scale == 0):
-                    self.Plot[(int) (self.__X)][y] = 1
+                    try:
+                        self.Plot[(int) (self.__X)][y] = 1
+                    except IndexError:
+                        print("Error: Ran out of space. Expanding the plot\r\n")
+                        self.ExpandPlot(0, 5)
+                        y -= 1
 
+            #increase y
             self.__Y += divisible
             self.Y += divisible
-
             return
 
         #calc slope
@@ -167,32 +177,42 @@ class RobotMemory:
 
         else:
             #negative slope
-            for x in xrange((tempX - divisible) + self.__Scale, self.__X + self.__Scale):
+            for x in xrange((tempX - divisible), self.__X):
                 #find out if it is a plottable point
                 if (((slope * (x - self.__X)) + self.__Y) % self.__Scale == 0.0):
                     Xs.append(x)
                     Ys.append((int)((slope * (x - self.__X)) + self.__Y))
 
-        print(len(Xs))
-
         #Plot the points
         for i in xrange(0, len(Xs)):
+            try:
                 self.Plot[Xs[i]][Ys[i]] = 1
-
-        diffX = Xs[len(Xs) - 1] - self.__X
-        diffY = Ys[len(Ys) - 1] - self.__Y
+            except IndexError:
+                print("Error: Ran out of space. Expanding the plot.\r\n")
+                self.ExpandPlot(5, 5)
+                i -= 1
 
         multiplyBy = 1.0 / self.__Scale
 
-        self.__X = Xs[len(Xs) - 1]
-        self.__Y = Ys[len(Ys) - 1]
+        if (slope >= 0):
+            try:
+                self.__X = Xs[len(Xs) - 1]
+                self.__Y = Ys[len(Ys) - 1]
+            except IndexError:
+                print("Error: No measurable progression.\r\n")
+
+        else:
+            try:
+                self.__X = Xs[0]
+                self.__Y = Ys[0]
+            except IndexError:
+                print("Error: No measurable progression.\r\n")
 
         self.X = self.__X - self.__MidpointX
         self.Y = self.__Y - self.__MidpointY
 
     #Gets the current position
     def GetPosition(self):
-        print ([self.__X, self.__Y])
         return [self.X, self.Y]
 
     #Gets the current slope
@@ -201,18 +221,3 @@ class RobotMemory:
             return float("nan")
         else:
             return (self.__TowardsY - self.__Y) / (self.__TowardsX - self.__X)
-
-
-print ("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n")
-sim = Myro.Simulation("test", 250, 250, Myro.Color("White"))
-r = Myro.makeRobot("SimScribbler", sim)
-r.setPose(125, 125, -90)
-mem = RobotMemory(3, 20, 20, 1, 1, 0, 1)
-mem.Start(0, 0)
-print (mem.GetPosition())
-mem.GoForward(2)
-print (mem.GetPosition())
-mem.Turn(45)
-mem.GoForward(3)
-print (mem.GetPosition())
-print (mem.Plot)
