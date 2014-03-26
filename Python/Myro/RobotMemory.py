@@ -127,7 +127,7 @@ class RobotMemory:
             self.__TowardsY += divisible
             tempY = self.__Y
 
-            for y in xrange(self.__Y, divisible + tempY):
+            for y in xrange(self.__Y + self.__Scale, divisible + tempY + self.__Scale):
                 if (y % self.__Scale == 0):
                     self.Plot[(int) (self.__X)][y] = 1
 
@@ -159,7 +159,7 @@ class RobotMemory:
 
         if (slope >= 0):
             #positive slope
-            for x in xrange(self.__X, (tempX + divisible)):
+            for x in xrange(self.__X + self.__Scale, (tempX + divisible) + self.__Scale):
                 #find out if it is a plottable point
                 if (((slope * (x - self.__X)) + self.__Y) % self.__Scale == 0.0):
                     Xs.append(x)
@@ -167,11 +167,13 @@ class RobotMemory:
 
         else:
             #negative slope
-            for x in xrange((tempX - divisible), self.__X):
+            for x in xrange((tempX - divisible) + self.__Scale, self.__X + self.__Scale):
                 #find out if it is a plottable point
                 if (((slope * (x - self.__X)) + self.__Y) % self.__Scale == 0.0):
                     Xs.append(x)
                     Ys.append((int)((slope * (x - self.__X)) + self.__Y))
+
+        print(len(Xs))
 
         #Plot the points
         for i in xrange(0, len(Xs)):
@@ -185,18 +187,18 @@ class RobotMemory:
         self.__X = Xs[len(Xs) - 1]
         self.__Y = Ys[len(Ys) - 1]
 
-        self.X += diffX * multiplyBy
-        self.Y += diffY * multiplyBy
+        self.X = self.__X - self.__MidpointX
+        self.Y = self.__Y - self.__MidpointY
 
     #Gets the current position
     def GetPosition(self):
+        print ([self.__X, self.__Y])
         return [self.X, self.Y]
 
     #Gets the current slope
     def GetSlope(self):
         if (self.__TowardsX - self.__X == 0):
             return float("nan")
-
         else:
             return (self.__TowardsY - self.__Y) / (self.__TowardsX - self.__X)
 
@@ -210,7 +212,7 @@ mem.Start(0, 0)
 print (mem.GetPosition())
 mem.GoForward(2)
 print (mem.GetPosition())
-mem.Turn(-45)
+mem.Turn(45)
 mem.GoForward(3)
 print (mem.GetPosition())
-print (mem.Plot[::-1])
+print (mem.Plot)
