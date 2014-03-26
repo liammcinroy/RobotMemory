@@ -54,7 +54,7 @@ class RobotMemory:
         self.__MidpointX *= multiplyBy
         self.__MidpointY *= multiplyBy
 
-        Myro.init("COM" + comPort)
+        Myro.init("COM" + str(comPort))
 
 
     #set midpoint, and current coordinates
@@ -178,7 +178,7 @@ class RobotMemory:
                 self.Plot[Xs[i]][Ys[i]] = 1
 
         diffX = Xs[len(Xs) - 1] - self.__X
-        diffY = Ys[len(Ys) - 1] - self.__X
+        diffY = Ys[len(Ys) - 1] - self.__Y
 
         multiplyBy = 1.0 / self.__Scale
 
