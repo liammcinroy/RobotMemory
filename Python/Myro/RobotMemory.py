@@ -6,10 +6,14 @@
 # Copyright:   (c) Liam 2014
 # Licence:     MIT
 #-------------------------------------------------------------------------------
-
 from __future__ import division
-import Myro
 from math import *
+import Myro
+
+def enum(**enums):
+    return type('Enum', (), enums)
+
+MemoryTypes = enum(Unknown=0, Visited=1) #add more if you want
 
 
 class RobotMemory:
@@ -45,7 +49,7 @@ class RobotMemory:
 
         multiplyBy = (int)(1.0 / scale)
 
-        self.Plot = [[0] * width * multiplyBy for col in range(height * multiplyBy)]
+        self.Plot = [[MemoryTypes.Unknown] * width * multiplyBy for col in range(height * multiplyBy)]
 
         self.__MidpointX *= multiplyBy
         self.__MidpointY *= multiplyBy
@@ -56,7 +60,7 @@ class RobotMemory:
     def ExpandPlot(self, x, y):
         for i in xrange(len(self.Plot)):
             for j in xrange(x * (1 / self.__Scale)):
-                self.Plot[i].append(0)
+                self.Plot[i].append(MemoryTypes.Unknown)
         addArray = self.Plot[0]
         for j in xrange(y):
             self.Plot.append(addArray)
@@ -135,7 +139,7 @@ class RobotMemory:
             for y in xrange(self.__Y + self.__Scale, divisible + tempY + self.__Scale):
                 if (y % self.__Scale == 0):
                     try:
-                        self.Plot[(int) (self.__X)][y] = 1
+                        self.Plot[(int) (self.__X)][y] = MemoryType.Visited
                     except IndexError:
                         print("Error: Ran out of space. Expanding the plot\r\n")
                         self.ExpandPlot(0, 5)
@@ -186,7 +190,7 @@ class RobotMemory:
         #Plot the points
         for i in xrange(0, len(Xs)):
             try:
-                self.Plot[Xs[i]][Ys[i]] = 1
+                self.Plot[Xs[i]][Ys[i]] = MemoryTypes.Visited
             except IndexError:
                 print("Error: Ran out of space. Expanding the plot.\r\n")
                 self.ExpandPlot(5, 5)
