@@ -13,7 +13,7 @@ import Myro
 def enum(**enums):
     return type('Enum', (), enums)
 
-MemoryTypes = enum(Unknown=0, Visited=1) #add more if you want
+MemoryTypes = enum(Unknown=0, Visited=1, OffGrid=-1) #add more if you want
 
 
 class RobotMemory:
@@ -57,7 +57,7 @@ class RobotMemory:
         Myro.init("COM" + str(comPort))
 
     #Expands the array
-    def ExpandPlot(self, x, y):
+    def expandPlot(self, x, y):
         for i in xrange(len(self.Plot)):
             for j in xrange(x * (1 / self.__Scale)):
                 self.Plot[i].append(MemoryTypes.Unknown)
@@ -81,7 +81,7 @@ class RobotMemory:
 
 
     #Turn a specified degrees
-    def Turn(self, degrees):
+    def turn(self, degrees):
         #3 = 1.5s/0.5speed = 90 degrees
         time90 = 3 * abs(self.Speed)
         time = time90 / abs(degrees)
@@ -120,7 +120,7 @@ class RobotMemory:
 
 
     #move forward
-    def GoForward(self, duration):
+    def goForward(self, duration):
         #if line is up and down
         if (self.__TowardsX - self.__X == 0):
             #go forward
@@ -216,12 +216,24 @@ class RobotMemory:
         self.Y = self.__Y - self.__MidpointY
 
     #Gets the current position
-    def GetPosition(self):
+    def getPosition(self):
         return [self.X, self.Y]
 
     #Gets the current slope
-    def GetSlope(self):
+    def getSlope(self):
         if (self.__TowardsX - self.__X == 0):
             return float("nan")
         else:
             return (self.__TowardsY - self.__Y) / (self.__TowardsX - self.__X)
+
+    def getNearby(self, radius):
+        radius *= (int) (1.0 / self.__Scale)
+        nearby = []
+        for i in xrange(self.__X - radius, self.__X + radius):
+            for j in xrange(self.__Y - radius, self.__Y + radius):
+                try:
+                    nearby.append(self.Plot[i][j]);
+                except IndexError:
+                    nearby.append(MemoryTypes.OffGrid)
+        return nearby
+
