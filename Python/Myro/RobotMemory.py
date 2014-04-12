@@ -54,11 +54,11 @@ class RobotMemory:
 
     #Expands the array
     def ExpandPlot(self, x, y):
-        for i in xrange(x):
-            for i2 in xrange(x):
-                self.Plot[x].append(0)
+        for i in xrange(len(self.Plot)):
+            for j in xrange(x * (1 / self.__Scale)):
+                self.Plot[i].append(0)
+        addArray = self.Plot[0]
         for j in xrange(y):
-            addArray = [0] * ((self.__MidpointY  + y / self.__Scale) / self.__Scale)
             self.Plot.append(addArray)
 
     #set midpoint, and current coordinates
