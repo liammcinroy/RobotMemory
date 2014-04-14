@@ -19,21 +19,21 @@ Some of the get methods include retrieving nice location (not the index of the m
 Modifying methods
 =================
 
-|Name            |Purpose              |Parameters                                                                    |
------------------------------------------------------------------------------------------------------------------------
-|`init`          |Basic constructor    | `self, [port, width, height, speed, scale, firstDirectionX, firstDirectionY]`|
-|`start`         |Cretes the plot      | `[startx, starty]`                                                           |
-|`goForward`     |Moves bot forward    | `duration`                                                                   |
-|`turn`          |Turns the bot        | `degrees`                                                                    |
-|`curve`         |Curves the bot       | `motorLeft, motorRight, duration`                                            |
+| Name          | Purpose            | Parameters                                                                   |
+|---------------|--------------------|------------------------------------------------------------------------------|
+| `__init__`    | Basic constructor  | `self, [port, width, height, speed, scale, firstDirectionX, firstDirectionY]`|
+| `start`       | Cretes the plot    | `[startx, starty]`                                                           |
+| `goForward`   | Moves bot forward  | `duration`                                                                   |
+| `turn`        | Turns the bot      | `degrees`                                                                    |
+| `curve`       | Curves the bot     | `motorLeft, motorRight, duration`                                            |
 -----------------------------------------------------------------------------------------------------------------------
 
 Retrieving methods
 ==================
 
-|Name            |Purpose                |Parameters                                                                  |
------------------------------------------------------------------------------------------------------------------------
-|`getPosition`   |Gets the plot position | _none_                                                                     |
-|`getSlope`      |Gets the plot slope    |_none_                                                                      |
-|`getNearby`     |Gets the nearby cells  |`radius`                                                                    |
+| Name            | Purpose                | Parameters                                                               |
+|-----------------|------------------------|--------------------------------------------------------------------------|
+| `getPosition`   | Gets the plot position | _none_                                                                   |
+| `getSlope`      | Gets the plot slope    | _none_                                                                   |
+| `getNearby`     | Gets the nearby cells  |`radius`                                                                  |
 -----------------------------------------------------------------------------------------------------------------------
