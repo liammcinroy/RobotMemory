@@ -13,12 +13,13 @@ import Myro
 def enum(**enums):
     return type('Enum', (), enums)
 
-MemoryTypes = enum(Unknown=0, Visited=1, OffGrid=-1) #add more if you want
+MemoryType = enum(Unknown=0, Visited=1, OffGrid=-1) #add more if you want
 
 
 class RobotMemory:
 
     Plot = [[]]
+    Speed = 0.5
 
     X = 0
     Y = 0
@@ -32,7 +33,7 @@ class RobotMemory:
     __TowardsX = 0
     __TowardsY = 0
 
-    __Scale = 0.0
+    __Scale = 0.5
 
 
     #initialize robot, and create memory
@@ -49,7 +50,7 @@ class RobotMemory:
 
         multiplyBy = (int)(1.0 / scale)
 
-        self.Plot = [[MemoryTypes.Unknown] * width * multiplyBy for col in range(height * multiplyBy)]
+        self.Plot = [[MemoryType.Unknown] * width * multiplyBy for col in range(height * multiplyBy)]
 
         self.__MidpointX *= multiplyBy
         self.__MidpointY *= multiplyBy
@@ -60,13 +61,13 @@ class RobotMemory:
     def expandPlot(self, x, y):
         for i in xrange(len(self.Plot)):
             for j in xrange(x * (1 / self.__Scale)):
-                self.Plot[i].append(MemoryTypes.Unknown)
+                self.Plot[i].append(MemoryType.Unknown)
         addArray = self.Plot[0]
         for j in xrange(y):
             self.Plot.append(addArray)
 
     #set midpoint, and current coordinates
-    def Start(self, x, y):
+    def start(self, x, y):
         self.__X = x + self.__MidpointX
         self.__Y = y + self.__MidpointY
 
@@ -173,24 +174,28 @@ class RobotMemory:
 
         if (slope >= 0):
             #positive slope
-            for x in xrange(self.__X + self.__Scale, (tempX + divisible) + self.__Scale):
+            for x in xrange(self.__X + self.__Scale, (tempX + divisible) + self.__Scale, self.__Scale):
+                #get point
+                y = (slope * (x - self.__X)) + self.Y
                 #find out if it is a plottable point
-                if (((slope * (x - self.__X)) + self.__Y) % self.__Scale == 0.0):
-                    Xs.append(x)
-                    Ys.append((int)((slope * (x - self.__X)) + self.__Y))
+                if (y % self.__Scale == 0.0):
+                    Xs.append((int)(x))
+                    Ys.append((int)(y))
 
         else:
             #negative slope
-            for x in xrange((tempX - divisible), self.__X):
+            for x in xrange((tempX - divisible), self.__X, self.__Scale):
+                #get point
+                y = (slope * (x - self.__X)) + self.Y
                 #find out if it is a plottable point
-                if (((slope * (x - self.__X)) + self.__Y) % self.__Scale == 0.0):
-                    Xs.append(x)
-                    Ys.append((int)((slope * (x - self.__X)) + self.__Y))
+                if (y % self.__Scale == 0.0):
+                    Xs.append((int)(x))
+                    Ys.append((int)(y))
 
         #Plot the points
         for i in xrange(0, len(Xs)):
             try:
-                self.Plot[Xs[i]][Ys[i]] = MemoryTypes.Visited
+                self.Plot[Xs[i]][Ys[i]] = MemoryType.Visited
             except IndexError:
                 print("Error: Ran out of space. Expanding the plot.\r\n")
                 self.ExpandPlot(5, 5)
@@ -215,6 +220,95 @@ class RobotMemory:
         self.X = self.__X - self.__MidpointX
         self.Y = self.__Y - self.__MidpointY
 
+    def curve(self, speedLeft, speedRight, duration): #TODO correct screwed up direction after curve
+        #move robot
+        Myro.robot.motors(speedLeft, speedRight)
+        Myro.wait(abs(duration))
+        Myro.robot.stop()
+
+        #set temp
+        tempX = self.__X
+        tempY = self.__Y
+
+        #set scale
+        greaterSpeed = 0
+        lesserSpeed = 0
+        if (speedLeft > speedRight):
+            greaterSpeed = speedLeft
+            lesserSpeed = speedRight
+        elif (speedRight > speedLeft):
+            greaterSpeed = speedRight
+            lesserSpeed = speedLeft
+
+        stretch = (1 / self.__Scale) * (greaterSpeed / lesserSpeed)
+
+        divisible = duration // self.__Scale
+
+        Xs = []
+        Ys = []
+        overAfterPoint = False
+        if (stretch >= 0):
+            #positive stretch
+            for x in xrange(self.__X + self.__Scale, (tempX + divisible) + self.__Scale, self.__Scale):
+                #get point
+                try:
+                    y = stretch * sqrt(1 - pow(((x - self.__X - stretch) / stretch), 2)) + self.__Y
+                    overAfterPoint = True
+                except ValueError: #TODO add support for > half circle turns
+                    if overAfterPoint == True:
+                        self.curve(-speedLeft, speedRight, duration)
+                    else:
+                        continue
+                #find out if it is a plottable point
+                if (y % self.__Scale == 0.0):
+                    Xs.append((int)(x))
+                    Ys.append((int)(y))
+
+        else:
+            #negative slope
+            for x in xrange((tempX - divisible), self.__X, self.__Scale):
+                #get point
+                try:
+                    y = stretch * (sqrt(1 - pow(((x - self.__X - stretch) / stretch), 2))) + self.__Y
+                except ValueError:
+                    continue
+                #find out if it is a plottable point
+                if (y % self.__Scale == 0.0):
+                        Xs.append((int)(x))
+                        Ys.append((int)(y))
+
+        #Plot the points
+        for i in xrange(0, len(Xs)):
+            try:
+                self.Plot[Xs[i]][Ys[i]] = MemoryType.Visited
+            except IndexError:
+                print("Error: Ran out of space. Expanding the plot.\r\n")
+                self.ExpandPlot(5, 5)
+                i -= 1
+
+        multiplyBy = 1.0 / self.__Scale
+
+        if (stretch >= 0):
+            try:
+                self.__X = Xs[len(Xs) - 1]
+                self.__Y = Ys[len(Ys) - 1]
+            except IndexError:
+                print("Error: No measurable progression.\r\n")
+
+        else:
+            try:
+                self.__X = Xs[0]
+                self.__Y = Ys[0]
+            except IndexError:
+                print("Error: No measurable progression.\r\n")
+
+        self.X = self.__X - self.__MidpointX
+        self.Y = self.__Y - self.__MidpointY
+
+        #add it to the direction
+        self.__TowardsX += self.__X
+        self.__TowardsY += self.__Y
+
     #Gets the current position
     def getPosition(self):
         return [self.X, self.Y]
@@ -230,10 +324,11 @@ class RobotMemory:
         radius *= (int) (1.0 / self.__Scale)
         nearby = []
         for i in xrange(self.__X - radius, self.__X + radius):
+            row = []
             for j in xrange(self.__Y - radius, self.__Y + radius):
                 try:
-                    nearby.append(self.Plot[i][j]);
+                    row.append(self.Plot[i][j]);
                 except IndexError:
-                    nearby.append(MemoryTypes.OffGrid)
+                    row.append(MemoryTypes.OffGrid)
+            nearby.append(row)
         return nearby
-
