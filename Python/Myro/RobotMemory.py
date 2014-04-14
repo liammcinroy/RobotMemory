@@ -80,7 +80,6 @@ class RobotMemory:
         self.Y = y
 
 
-
     #Turn a specified degrees
     def turn(self, degrees):
         #3 = 1.5s/0.5speed = 90 degrees
@@ -221,11 +220,6 @@ class RobotMemory:
         self.Y = self.__Y - self.__MidpointY
 
     def curve(self, speedLeft, speedRight, duration): #TODO correct screwed up direction after curve
-        #move robot
-        Myro.robot.motors(speedLeft, speedRight)
-        Myro.wait(abs(duration))
-        Myro.robot.stop()
-
         #set temp
         tempX = self.__X
         tempY = self.__Y
@@ -233,12 +227,21 @@ class RobotMemory:
         #set scale
         greaterSpeed = 0
         lesserSpeed = 0
-        if (speedLeft > speedRight):
+        if (abs(speedLeft) > abs(speedRight)):
             greaterSpeed = speedLeft
             lesserSpeed = speedRight
-        elif (speedRight > speedLeft):
+        elif (abs(speedRight) > abs(speedLeft)):
             greaterSpeed = speedRight
             lesserSpeed = speedLeft
+        else:
+            duration = (duration / self.Speed) * speedLeft
+            self.goForward(duration)
+            return
+
+        #move robot
+        Myro.robot.motors(speedLeft, speedRight)
+        Myro.wait(abs(duration))
+        Myro.robot.stop()
 
         stretch = (1 / self.__Scale) * (greaterSpeed / lesserSpeed)
 
@@ -247,35 +250,31 @@ class RobotMemory:
         Xs = []
         Ys = []
         overAfterPoint = False
-        if (stretch >= 0):
-            #positive stretch
-            for x in xrange(self.__X + self.__Scale, (tempX + divisible) + self.__Scale, self.__Scale):
-                #get point
-                try:
-                    y = stretch * sqrt(1 - pow(((x - self.__X - stretch) / stretch), 2)) + self.__Y
-                    overAfterPoint = True
-                except ValueError: #TODO add support for > half circle turns
-                    if overAfterPoint == True:
-                        self.curve(-speedLeft, speedRight, duration)
-                    else:
-                        continue
-                #find out if it is a plottable point
-                if (y % self.__Scale == 0.0):
-                    Xs.append((int)(x))
-                    Ys.append((int)(y))
 
-        else:
-            #negative slope
-            for x in xrange((tempX - divisible), self.__X, self.__Scale):
-                #get point
-                try:
-                    y = stretch * (sqrt(1 - pow(((x - self.__X - stretch) / stretch), 2))) + self.__Y
-                except ValueError:
+        timesOver = 1
+        maxAmount = tempX + divisible + self.__Scale
+        minAmount = self.__X + self.__Scale
+        #positive stretch
+        for x in xrange(minAmount, maxAmount, self.__Scale):
+            #get point
+            try:
+                y = stretch * sqrt(1 - pow(((x - self.__X - stretch) / stretch), 2)) + self.__Y
+                overAfterPoint = True
+            except ValueError: #Support for > half circle turns
+                if overAfterPoint == True:
+                    try:
+                        x -= (timesOver * self.__Scale + timesOver)
+                        y = -stretch * (sqrt(1 - pow(((x - self.__X - stretch) / stretch), 2))) + self.__Y
+                        timesOver += 1
+                        maxAmount -= x
+                    except ValueError:
+                        continue
+                else:
                     continue
-                #find out if it is a plottable point
-                if (y % self.__Scale == 0.0):
-                        Xs.append((int)(x))
-                        Ys.append((int)(y))
+            #find out if it is a plottable point
+            if (y % self.__Scale == 0.0):
+                Xs.append((int)(x))
+                Ys.append((int)(y))
 
         #Plot the points
         for i in xrange(0, len(Xs)):
@@ -305,7 +304,7 @@ class RobotMemory:
         self.X = self.__X - self.__MidpointX
         self.Y = self.__Y - self.__MidpointY
 
-        #add it to the direction
+        #add it to the direction TODO: Correct
         self.__TowardsX += self.__X
         self.__TowardsY += self.__Y
 
