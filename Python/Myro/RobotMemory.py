@@ -249,12 +249,15 @@ class RobotMemory:
 
         Xs = []
         Ys = []
+        tempXs = []
+        tempYs = []
+
         overAfterPoint = False
 
         timesOver = 1
         maxAmount = tempX + divisible + self.__Scale
         minAmount = self.__X + self.__Scale
-        #positive stretch
+        #stretch
         for x in xrange(minAmount, maxAmount, self.__Scale):
             #get point
             try:
@@ -272,9 +275,30 @@ class RobotMemory:
                 else:
                     continue
             #find out if it is a plottable point
-            if (y % self.__Scale == 0.0):
-                Xs.append((int)(x))
-                Ys.append((int)(y))
+            tempXs.append(x)
+            tempYs.append(y)
+
+        if (self.getSlope() != float("nan")):
+            theta = (90 * (pi / 180)) - atan(self.getSlope())
+
+            sina = sin(theta)
+            cosa = cos(theta)
+    
+            for i in xrange(0, len(tempXs)):
+                pX = self.__TowardsX - tempXs[i]
+                pY = self.__TowardsY - tempYs[i]
+
+                tempXs[i] = (cosa * pX - sina * pY) + tempXs[i]
+                tempYs[i] = (sina * pX + cosa * pY) + tempYs[i]
+
+                if (tempXs[i] % self.__Scale == 0 and tempYs[i] % self.__Scale == 0):
+                    Xs.append(tempXs[i])
+                    Ys.append(tempYs[i])
+        else:
+            for i in xrange(0, len(tempXs)):
+                if (tempXs[i] % self.__Scale == 0 and tempYs[i] % self.__Scale == 0):
+                    Xs.append(tempXs[i])
+                    Ys.append(tempYs[i])
 
         #Plot the points
         for i in xrange(0, len(Xs)):
@@ -301,12 +325,16 @@ class RobotMemory:
             except IndexError:
                 print("Error: No measurable progression.\r\n")
 
+        #add it to the direction TODO: Correct
+        self.__TowardsX = maxAmount
+        try:
+            self.__TowardsY = stretch * (sqrt(1 - pow(((maxAmount - self.__X - stretch) / stretch), 2))) + self.__Y
+        except ValueError:
+            self.TowardsY = -stretch * (sqrt(1 - pow(((maxAmount - self.__X - stretch) / stretch), 2))) + self.__Y
+
         self.X = self.__X - self.__MidpointX
         self.Y = self.__Y - self.__MidpointY
 
-        #add it to the direction TODO: Correct
-        self.__TowardsX += self.__X
-        self.__TowardsY += self.__Y
 
     #Gets the current position
     def getPosition(self):
@@ -331,3 +359,12 @@ class RobotMemory:
                     row.append(MemoryTypes.OffGrid)
             nearby.append(row)
         return nearby
+
+print ("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n")
+sim = Myro.Simulation("test", 250, 250, Myro.Color("White"))
+r = Myro.makeRobot("SimScribbler", sim)
+r.setPose(125, 125, -90)
+mem = RobotMemory(3, 20, 20, 1, 1, 1, 1)
+mem.start(0, 0)
+mem.curve(.5, .5, 6)
+print(mem.Plot)
