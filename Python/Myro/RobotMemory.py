@@ -1,5 +1,4 @@
 #-------------------------------------------------------------------------------
-<<<<<<< HEAD
 # Name:        Robot Memory
 # Purpose:     Stores memory about where robot has been
 # Author:      Liam McInory
@@ -9,41 +8,6 @@
 #-------------------------------------------------------------------------------
 from __future__ import division
 from math import *
-=======
-
-
-
-# Name:        Robot Memory
-
-
-
-# Purpose:     Stores memory about where robot has been
-
-
-
-# Author:      Liam McInory
-
-
-
-# Created:     06/03/2014
-
-
-
-# Copyright:   (c) Liam 2014
-
-
-
-# Licence:     MIT
-
-
-
-#-------------------------------------------------------------------------------
-
-
-
-from __future__ import division
-
->>>>>>> fad097be7a9f972463c8f13ce5a3c37b8f515197
 import Myro
 
 def enum(**enums):
@@ -70,26 +34,12 @@ class RobotMemory:
     __TowardsX = 0
     __TowardsY = 0
 
-<<<<<<< HEAD
     __Scale = 0.5
-=======
-    TowardsX = 0
-
-    TowardsY = 0
->>>>>>> fad097be7a9f972463c8f13ce5a3c37b8f515197
-
-
 
 
     #initialize robot, and create memory
     def __init__ (self, comPort = 3, width = 250, height = 250, speed = 0.5, scale = 0.5, lookX = 0, lookY = 1):
-<<<<<<< HEAD
         #set global variables
-=======
-
-        #set global variables
-
->>>>>>> fad097be7a9f972463c8f13ce5a3c37b8f515197
         self.Speed = speed
         self.__Scale = scale
 
@@ -99,23 +49,9 @@ class RobotMemory:
         self.__MidpointX = width / 2
         self.__MidpointY = height / 2
 
-<<<<<<< HEAD
-        multiplyBy = (int)(1.0 / scale)
-=======
-        self.TowardsY = lookY
-
-        self.MidpointX = width / 2
-
-        self.MidpointY = height / 2
-
         multiplyBy = (int)(1.0 / scale)
 
-        self.Plot = [[0] * width * multiplyBy for col in range(height * multiplyBy)]
-
-        self.MidpointX *= multiplyBy
-
-        self.MidpointY *= multiplyBy
->>>>>>> fad097be7a9f972463c8f13ce5a3c37b8f515197
+        multiplyBy = (int)(1.0 / scale)
 
         self.Plot = [[MemoryType.Unknown] * width * multiplyBy for col in range(height * multiplyBy)]
 
@@ -134,53 +70,25 @@ class RobotMemory:
             self.Plot.append(addArray)
 
 
-
     #set midpoint, and current coordinates
     def start(self, x, y):
         self.__X = x + self.__MidpointX
         self.__Y = y + self.__MidpointY
+
+        self.X = x
+        self.Y = y
 
         self.__TowardsX += self.__MidpointX
         self.__TowardsY += self.__MidpointY
 
         self.Plot[(int) (floor(self.__X))][(int) (floor(self.__Y))] = 1
 
-<<<<<<< HEAD
-        self.X = x
-        self.Y = y
-=======
-        self.Y = y + self.MidpointY
-
-        self.TowardsX += self.MidpointX
-
-        self.TowardsY += self.MidpointY
-
-        self.Plot[(int) (floor(self.X))][(int) (floor(self.Y))] = 1
->>>>>>> fad097be7a9f972463c8f13ce5a3c37b8f515197
-
-
-
-
 
     #Turn a specified degrees
-<<<<<<< HEAD
     def turn(self, degrees):
-=======
-
-    def Turn(self, degrees, left):
-
->>>>>>> fad097be7a9f972463c8f13ce5a3c37b8f515197
         #3 = 1.5s/0.5speed = 90 degrees
         time90 = 3 * abs(self.Speed)
         time = time90 / abs(degrees)
-
-<<<<<<< HEAD
-        left = 0
-=======
-
-
-        if (left == 1):
->>>>>>> fad097be7a9f972463c8f13ce5a3c37b8f515197
 
         if (degrees >= 0):
             left = 1
@@ -189,48 +97,17 @@ class RobotMemory:
             degrees += 90
             Myro.robot.turnLeft(time, abs(self.Speed))
 
-
-
         else:
             Myro.robot.turnRight(time, abs(self.Speed))
 
-<<<<<<< HEAD
         #get rotation values
         degrees *= (pi / 180)
         sina = sin(degrees)
         cosa = cos(degrees)
-
 
         #origin points
         pX = self.__TowardsX - self.__X
         pY = self.__TowardsY - self.__Y
-=======
-
-
-        #get rotation values
-
-        degrees *= (pi / 180)
-
-        sina = sin(degrees)
-
-        cosa = cos(degrees)
-
-
-
-        #origin points
-
-        pX = self.TowardsX - self.X
-
-        pY = self.TowardsY - self.Y
-
-
-
-        #apply rotation
-
-        self.TowardsX = (cosa * pX - sina * pY) + self.X
-
-        self.TowardsY = (sina * pX + cosa * pY) + self.Y
->>>>>>> fad097be7a9f972463c8f13ce5a3c37b8f515197
 
         #apply rotation
         if (left == 0):
@@ -243,29 +120,13 @@ class RobotMemory:
         self.__TowardsY = (sina * pX + cosa * pY) + self.__Y
 
 
-<<<<<<< HEAD
     #move forward
     def goForward(self, duration):
         #if line is up and down
         if (self.__TowardsX - self.__X == 0):
-            #go forward
-=======
-    def GoForward(self, duration):
-
-        #if line is up and down
-
-        if (self.TowardsX - self.X == 0):
-
-            #go forward
-
->>>>>>> fad097be7a9f972463c8f13ce5a3c37b8f515197
             Myro.robot.motors(self.Speed, self.Speed)
-
             Myro.wait(abs(duration))
-
             Myro.robot.stop()
-
-<<<<<<< HEAD
             #get the amount of points forward
             divisible = duration // self.__Scale
 
@@ -287,87 +148,29 @@ class RobotMemory:
             self.__Y += divisible
             self.Y += divisible
             return
-=======
-
-
-            #get the amount of points forward
-
-            divisible = duration // self.Scale
-
-
-
-            #add them to the direction
-
-            self.TowardsY += divisible
-
-            tempY = self.Y
-
-
-
-            for y in xrange(self.Y, divisible + tempY):
-
-                if (y % self.Scale == 0):
-
-                    self.Plot[(int) (self.X)][y] = 1
-            self.Y += divisible
-
-            return
-
-
-
-        #calc slope
-
-        slope = (self.TowardsY - self.Y) / (self.TowardsX - self.X)
->>>>>>> fad097be7a9f972463c8f13ce5a3c37b8f515197
 
         #calc slope
         slope = (self.__TowardsY - self.__Y) / (self.__TowardsX - self.__X)
         tempX = self.__X
         tempY = self.__Y
 
-<<<<<<< HEAD
-=======
-        tempY = self.Y
-
-
-
->>>>>>> fad097be7a9f972463c8f13ce5a3c37b8f515197
         #go forward
         Myro.robot.motors(self.Speed, self.Speed)
         Myro.wait(abs(duration))
 
         Myro.robot.stop()
 
-
-<<<<<<< HEAD
-=======
-
->>>>>>> fad097be7a9f972463c8f13ce5a3c37b8f515197
         #get the amount of points forward
         divisible = duration // self.__Scale
 
-<<<<<<< HEAD
         #add them to the direction
         self.__TowardsX += divisible
         self.__TowardsY += divisible
-=======
         divisible = duration / self.Scale
-
-
-
-        #add them to the direction
-
-        self.TowardsX += divisible
-
-        self.TowardsY += divisible
->>>>>>> fad097be7a9f972463c8f13ce5a3c37b8f515197
-
-
 
         Xs = []
         Ys = []
 
-<<<<<<< HEAD
         if (slope >= 0):
             #positive slope
             for x in xrange(self.__X + self.__Scale, (tempX + divisible) + self.__Scale, self.__Scale):
@@ -377,15 +180,6 @@ class RobotMemory:
                 if (y % self.__Scale == 0.0):
                     Xs.append((int)(x))
                     Ys.append((int)(y))
-=======
-
-
-        for x in xrange(self.X, (tempX + divisible)):
-
-            #find out if it is a plottable point
-
-            if (((slope * (x - self.X)) + self.Y) % self.Scale == 0.0):
->>>>>>> fad097be7a9f972463c8f13ce5a3c37b8f515197
 
         else:
             #negative slope
@@ -397,11 +191,6 @@ class RobotMemory:
                     Xs.append((int)(x))
                     Ys.append((int)(y))
 
-<<<<<<< HEAD
-=======
-                Ys.append((int)((slope * (x - self.X)) + self.Y))
-
->>>>>>> fad097be7a9f972463c8f13ce5a3c37b8f515197
         #Plot the points
         for i in xrange(0, len(Xs)):
             try:
@@ -489,7 +278,6 @@ class RobotMemory:
             tempXs.append(x)
             tempYs.append(y)
 
-<<<<<<< HEAD
         if (self.getSlope() != float("nan")):
             theta = (90 * (pi / 180)) - atan(self.getSlope())
 
@@ -499,15 +287,6 @@ class RobotMemory:
             for i in xrange(0, len(tempXs)):
                 pX = self.__TowardsX - tempXs[i]
                 pY = self.__TowardsY - tempYs[i]
-=======
-
-        self.X = Xs[len(Xs) - 1]
-
-        self.Y = Ys[len(Ys) - 1]
-
-
-
->>>>>>> fad097be7a9f972463c8f13ce5a3c37b8f515197
 
                 tempXs[i] = (cosa * pX - sina * pY) + tempXs[i]
                 tempYs[i] = (sina * pX + cosa * pY) + tempYs[i]
@@ -583,26 +362,9 @@ class RobotMemory:
 
 print ("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n")
 sim = Myro.Simulation("test", 250, 250, Myro.Color("White"))
-
 r = Myro.makeRobot("SimScribbler", sim)
-
 r.setPose(125, 125, -90)
-<<<<<<< HEAD
 mem = RobotMemory(3, 20, 20, 1, 1, 1, 1)
 mem.start(0, 0)
 mem.curve(.5, .5, 6)
 print(mem.Plot)
-=======
-
-mem = RobotMemory(3, 20, 20, 1, 1, 0, 1)
-
-mem.Start(0, 0)
-
-mem.GoForward(2)
-
-mem.Turn(-45, 1)
-
-mem.GoForward(3)
-
-print (mem.Plot[::-1])
->>>>>>> fad097be7a9f972463c8f13ce5a3c37b8f515197
