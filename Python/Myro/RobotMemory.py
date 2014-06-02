@@ -8,7 +8,6 @@
 #-------------------------------------------------------------------------------
 from __future__ import division
 from math import *
-
 import Myro
 
 def enum(**enums):
@@ -36,8 +35,6 @@ class RobotMemory:
     __TowardsY = 0
 
     __Scale = 0.5
-
-
 
 
     #initialize robot, and create memory
@@ -73,11 +70,13 @@ class RobotMemory:
             self.Plot.append(addArray)
 
 
-
     #set midpoint, and current coordinates
     def start(self, x, y):
         self.__X = x + self.__MidpointX
         self.__Y = y + self.__MidpointY
+
+        self.X = x
+        self.Y = y
 
         self.__TowardsX += self.__MidpointX
         self.__TowardsY += self.__MidpointY
