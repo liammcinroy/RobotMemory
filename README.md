@@ -21,7 +21,7 @@ Modifying methods
 
 | Name          | Purpose            | Parameters                                                                   |
 |---------------|--------------------|------------------------------------------------------------------------------|
-| `__init__`    | Basic constructor  | `self, [port, width, height, speed, scale, firstDirectionX, firstDirectionY]`|
+| `__init__`    | Basic constructor  | `[port, width, height, speed, scale, firstDirectionX, firstDirectionY]`|
 | `start`       | Cretes the plot    | `[startx, starty]`                                                           |
 | `goForward`   | Moves bot forward  | `duration`                                                                   |
 | `turn`        | Turns the bot      | `degrees`                                                                    |
