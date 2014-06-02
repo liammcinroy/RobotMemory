@@ -166,7 +166,7 @@ class RobotMemory:
         #add them to the direction
         self.__TowardsX += divisible
         self.__TowardsY += divisible
-        divisible = duration / self.Scale
+        divisible = duration / self.__Scale
 
         Xs = []
         Ys = []
@@ -303,7 +303,7 @@ class RobotMemory:
         #Plot the points
         for i in xrange(0, len(Xs)):
             try:
-                self.Plot[Xs[i]][Ys[i]] = MemoryType.Visited
+                self.Plot[(int)(Xs[i])][(int)(Ys[i])] = MemoryType.Visited
             except IndexError:
                 print("Error: Ran out of space. Expanding the plot.\r\n")
                 self.ExpandPlot(5, 5)
@@ -364,7 +364,7 @@ print ("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n
 sim = Myro.Simulation("test", 250, 250, Myro.Color("White"))
 r = Myro.makeRobot("SimScribbler", sim)
 r.setPose(125, 125, -90)
-mem = RobotMemory(3, 20, 20, 1, 1, 1, 1)
+mem = RobotMemory(3, 20, 20, 1, 1, 1, 0)
 mem.start(0, 0)
-mem.curve(.5, .5, 6)
+mem.curve(.5, 1, 3)
 print(mem.Plot)
