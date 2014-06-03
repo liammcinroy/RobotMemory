@@ -175,7 +175,7 @@ class RobotMemory:
             #positive slope
             for x in xrange(self.__X + self.__Scale, (tempX + divisible) + self.__Scale, self.__Scale):
                 #get point
-                y = (slope * (x - self.__X)) + self.Y
+                y = (slope * (x - self.__X)) + self.__Y
                 #find out if it is a plottable point
                 if (y % self.__Scale == 0.0):
                     Xs.append((int)(x))
@@ -185,7 +185,7 @@ class RobotMemory:
             #negative slope
             for x in xrange((tempX - divisible), self.__X, self.__Scale):
                 #get point
-                y = (slope * (x - self.__X)) + self.Y
+                y = (slope * (x - self.__X)) + self.__Y
                 #find out if it is a plottable point
                 if (y % self.__Scale == 0.0):
                     Xs.append((int)(x))
@@ -303,7 +303,7 @@ class RobotMemory:
         #Plot the points
         for i in xrange(0, len(Xs)):
             try:
-                self.Plot[(int)(Xs[i])][(int)(Ys[i])] = MemoryType.Visited
+                self.Plot[(int)(Xs[i])][(int)(Ys[i]) - 1] = MemoryType.Visited #quick hack
             except IndexError:
                 print("Error: Ran out of space. Expanding the plot.\r\n")
                 self.ExpandPlot(5, 5)
@@ -314,14 +314,14 @@ class RobotMemory:
         if (stretch >= 0):
             try:
                 self.__X = Xs[len(Xs) - 1]
-                self.__Y = Ys[len(Ys) - 1]
+                self.__Y = Ys[len(Ys) - 1] - 1 #quick hack
             except IndexError:
                 print("Error: No measurable progression.\r\n")
 
         else:
             try:
                 self.__X = Xs[0]
-                self.__Y = Ys[0]
+                self.__Y = Ys[0] #quick hack
             except IndexError:
                 print("Error: No measurable progression.\r\n")
 
@@ -330,7 +330,10 @@ class RobotMemory:
         try:
             self.__TowardsY = stretch * (sqrt(1 - pow(((maxAmount - self.__X - stretch) / stretch), 2))) + self.__Y
         except ValueError:
-            self.TowardsY = -stretch * (sqrt(1 - pow(((maxAmount - self.__X - stretch) / stretch), 2))) + self.__Y
+            try:
+                self.TowardsY = -stretch * (sqrt(1 - pow(((maxAmount - self.__X - stretch) / stretch), 2))) + self.__Y
+            except:
+                print("Error: Curving still sucks.\r\n")
 
         self.X = self.__X - self.__MidpointX
         self.Y = self.__Y - self.__MidpointY
@@ -338,7 +341,7 @@ class RobotMemory:
 
     #Gets the current position
     def getPosition(self):
-        return [self.X, self.Y]
+        return self.X, self.Y
 
     #Gets the current slope
     def getSlope(self):
@@ -360,11 +363,16 @@ class RobotMemory:
             nearby.append(row)
         return nearby
 
+    def getPointAtPosition(self, x, y):
+        return mem.Plot[x + self.__MidpointX, y + self.__MidpointY]
+
 print ("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n")
 sim = Myro.Simulation("test", 250, 250, Myro.Color("White"))
 r = Myro.makeRobot("SimScribbler", sim)
 r.setPose(125, 125, -90)
 mem = RobotMemory(3, 20, 20, 1, 1, 1, 0)
 mem.start(0, 0)
-mem.curve(.5, 1, 3)
+print (mem.getPosition())
+mem.curve(.25, 1, 4)
+print (mem.getPosition())
 print(mem.Plot)
