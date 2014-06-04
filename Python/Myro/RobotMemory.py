@@ -49,9 +49,9 @@ class RobotMemory:
         self.__MidpointX = width / 2
         self.__MidpointY = height / 2
 
-        multiplyBy = (int)(1.0 / scale)
+        multiplyBy = int(1.0 / scale)
 
-        multiplyBy = (int)(1.0 / scale)
+        multiplyBy = int(1.0 / scale)
 
         self.Plot = [[MemoryType.Unknown] * width * multiplyBy for col in range(height * multiplyBy)]
 
@@ -85,25 +85,30 @@ class RobotMemory:
 
 
     #Turn a specified degrees
-    def turn(self, degrees):
+    def turn(self, theta):
         #3 = 1.5s/0.5speed = 90 degrees
         time90 = 3 * abs(self.Speed)
-        time = time90 / abs(degrees)
+        time = time90 / abs(theta)
 
-        if (degrees >= 0):
+        left = 0
+
+        if (theta > 0):
             left = 1
 
         if (left == 1):
-            degrees += 90
             Myro.robot.turnLeft(time, abs(self.Speed))
-
         else:
             Myro.robot.turnRight(time, abs(self.Speed))
 
+        if (self.getSlope == 0):
+            if (self.__TowardsX < self.__X):
+                theta = 180 - theta
+        else:
+            theta = degrees(atan(self.getSlope())) - theta
         #get rotation values
-        degrees *= (pi / 180)
-        sina = sin(degrees)
-        cosa = cos(degrees)
+        theta *= (pi / 180)
+        sina = sin(theta)
+        cosa = cos(theta)
 
         #origin points
         pX = self.__TowardsX - self.__X
@@ -130,24 +135,46 @@ class RobotMemory:
             #get the amount of points forward
             divisible = duration // self.__Scale
 
-            #add them to the direction
-            self.__TowardsY += divisible
-            tempY = self.__Y
+            if (self.__TowardsY > self.__Y):
+                #add them to the direction
+                self.__TowardsY += divisible
+                tempY = self.__Y
 
-            #add them to plot
-            for y in xrange(self.__Y + self.__Scale, divisible + tempY + self.__Scale):
-                if (y % self.__Scale == 0):
-                    try:
-                        self.Plot[(int) (self.__X)][y] = MemoryType.Visited
-                    except IndexError:
-                        print("Error: Ran out of space. Expanding the plot\r\n")
-                        self.ExpandPlot(0, 5)
-                        y -= 1
+                #add them to plot
+                for y in xrange(self.__Y + self.__Scale, divisible + tempY + self.__Scale):
+                    if (y % self.__Scale == 0):
+                        try:
+                            self.Plot[(int) (self.__X)][y] = MemoryType.Visited
+                        except IndexError:
+                            print("Error: Ran out of space. Expanding the plot\r\n")
+                            self.ExpandPlot(0, 5)
+                            y -= 1
 
-            #increase y
-            self.__Y += divisible
-            self.Y += divisible
-            return
+                #increase y
+                self.__Y += divisible
+                self.Y += divisible
+                return
+
+            else:
+                #subtract them from the direction
+                self.__TowardsY -= divisible
+                tempY = self.__Y
+
+                #add them to plot
+                for y in xrange(self.__Y - divisible,  tempY + self.__Scale):
+                    if (y % self.__Scale == 0):
+                        try:
+                            self.Plot[(int) (self.__X)][y] = MemoryType.Visited
+                        except IndexError:
+                            print("Error: Ran out of space. Expanding the plot\r\n")
+                            self.ExpandPlot(0, 5)
+                            y -= 1
+
+                #increase y
+                self.__Y -= divisible
+                self.Y -= divisible
+                return
+
 
         #calc slope
         slope = (self.__TowardsY - self.__Y) / (self.__TowardsX - self.__X)
@@ -178,8 +205,8 @@ class RobotMemory:
                 y = (slope * (x - self.__X)) + self.__Y
                 #find out if it is a plottable point
                 if (y % self.__Scale == 0.0):
-                    Xs.append((int)(x))
-                    Ys.append((int)(y))
+                    Xs.append(int(x))
+                    Ys.append(int(y))
 
         else:
             #negative slope
@@ -188,8 +215,8 @@ class RobotMemory:
                 y = (slope * (x - self.__X)) + self.__Y
                 #find out if it is a plottable point
                 if (y % self.__Scale == 0.0):
-                    Xs.append((int)(x))
-                    Ys.append((int)(y))
+                    Xs.append(int(x))
+                    Ys.append(int(y))
 
         #Plot the points
         for i in xrange(0, len(Xs)):
@@ -223,6 +250,8 @@ class RobotMemory:
         #set temp
         tempX = self.__X
         tempY = self.__Y
+
+
 
         #set scale
         greaterSpeed = 0
@@ -274,9 +303,9 @@ class RobotMemory:
                         continue
                 else:
                     continue
-        #find out if it is a plottable point
-        tempXs.append(x)
-        tempYs.append(y)
+            #find out if it is a plottable point
+            tempXs.append(x)
+            tempYs.append(y)
 
         theta = 90 - degrees(atan(self.getSlope()))
 
@@ -288,7 +317,7 @@ class RobotMemory:
             pY = self.__Y - self.__MidpointY
 
             tempXs[i] = (cosa * pX - sina * pY) + tempXs[i]
-            tempYs[i] = (sina * pX + cosa * pY) + tempYs[i] #quick hack
+            tempYs[i] = (sina * pX + cosa * pY) + tempYs[i]
 
             if (tempXs[i] % self.__Scale == 0 and tempYs[i] % self.__Scale == 0):
                 Xs.append(tempXs[i])
@@ -297,7 +326,7 @@ class RobotMemory:
         #Plot the points
         for i in xrange(0, len(Xs)):
             try:
-                self.Plot[(int)(Xs[i])][(int)(Ys[i])] = MemoryType.Visited
+                self.Plot[int(Xs[i])][int(Ys[i])] = MemoryType.Visited
             except IndexError:
                 print("Error: Ran out of space. Expanding the plot.\r\n")
                 self.ExpandPlot(5, 5)
@@ -316,20 +345,44 @@ class RobotMemory:
         else:
             try:
                 self.__X = Xs[0]
-                self.__Y = Ys[0] #quick hack
+                self.__Y = Ys[0]
             except IndexError:
                 print("Error: No measurable progression.\r\n")
                 return
 
-        #add it to the direction TODO: Correct
-        self.__TowardsX = maxAmount
+        #add it to the direction using derivative
+        slope = 0
         try:
-            self.__TowardsY = stretch * (sqrt(1 - pow(((maxAmount - self.__X - stretch) / stretch), 2))) + self.__Y
+            slope = (tempX - self.__X)/ (stretch * sqrt(1 - (pow(tempX - self.__X, 2)/pow(stretch, 2))))
         except ValueError:
-            try:
-                self.TowardsY = -stretch * (sqrt(1 - pow(((maxAmount - self.__X - stretch) / stretch), 2))) + self.__Y
-            except:
-                print("Error: Curving still sucks.\r\n")
+            if (stretch < 0):
+                self.__TowardsX = self.__X
+                self.__TowardsY = self.__Y + 1
+                self.X = self.__X - self.__MidpointX
+                self.Y = self.__Y - self.__MidpointY
+                return
+            else:
+                self.__TowardsX = self.__X
+                self.__TowardsY = self.__Y - 1
+                self.X = self.__X - self.__MidpointX
+                self.Y = self.__Y - self.__MidpointY
+                return
+
+        theta = 90 - degrees(atan(self.getSlope()))
+
+        sina = sin(theta)
+        cosa = cos(theta)
+
+        pX = tempX - self.__MidpointX
+        pY = tempY - self.__MidpointY
+
+        if (stretch >= 0):
+            newY = slope * (self.__X + 1 - tempX) + tempY
+        else:
+            newY = slope * (self.__X - 1 - tempX) + tempY
+
+        self.__TowardsX = (cosa * pX - sina * pY) + tempX
+        self.__TowardsY = (sina * pX + cosa * pY) + newY
 
         self.X = self.__X - self.__MidpointX
         self.Y = self.__Y - self.__MidpointY
@@ -360,7 +413,7 @@ class RobotMemory:
         return nearby
 
     def getPointAtPosition(self, x, y):
-        return mem.Plot[x + (int)(self.__MidpointX)][y + (int)(self.__MidpointY)]
+        return mem.Plot[x + int(self.__MidpointX)][y + int(self.__MidpointY)]
 
 print ("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n")
 sim = Myro.Simulation("test", 250, 250, Myro.Color("White"))
@@ -368,7 +421,9 @@ r = Myro.makeRobot("SimScribbler", sim)
 r.setPose(125, 125, -90)
 mem = RobotMemory(3, 20, 20, 1, 1, 0, 1)
 mem.start(0, 0)
-print (mem.getPosition())
 mem.curve(.5, 1, 4)
+mem.goForward(2)
+mem.turn(45)
+mem.goForward(3)
 print (mem.getPosition())
 print(mem.Plot)
