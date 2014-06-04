@@ -81,7 +81,7 @@ class RobotMemory:
         self.__TowardsX += self.__MidpointX
         self.__TowardsY += self.__MidpointY
 
-        self.Plot[(int) (floor(self.__X))][(int) (floor(self.__Y))] = 1
+        self.Plot[(int) (floor(self.__X))][(int) (floor(self.__Y))] = MemoryType.Visited
 
 
     #Turn a specified degrees
@@ -274,36 +274,30 @@ class RobotMemory:
                         continue
                 else:
                     continue
-            #find out if it is a plottable point
-            tempXs.append(x)
-            tempYs.append(y)
+        #find out if it is a plottable point
+        tempXs.append(x)
+        tempYs.append(y)
 
-        if (self.getSlope() != float("nan")):
-            theta = (90 * (pi / 180)) - atan(self.getSlope())
+        theta = 90 - degrees(atan(self.getSlope()))
 
-            sina = sin(theta)
-            cosa = cos(theta)
+        sina = sin(theta)
+        cosa = cos(theta)
     
-            for i in xrange(0, len(tempXs)):
-                pX = self.__TowardsX - tempXs[i]
-                pY = self.__TowardsY - tempYs[i]
+        for i in xrange(0, len(tempXs)):
+            pX = self.__X - self.__MidpointX
+            pY = self.__Y - self.__MidpointY
 
-                tempXs[i] = (cosa * pX - sina * pY) + tempXs[i]
-                tempYs[i] = (sina * pX + cosa * pY) + tempYs[i]
+            tempXs[i] = (cosa * pX - sina * pY) + tempXs[i]
+            tempYs[i] = (sina * pX + cosa * pY) + tempYs[i] #quick hack
 
-                if (tempXs[i] % self.__Scale == 0 and tempYs[i] % self.__Scale == 0):
-                    Xs.append(tempXs[i])
-                    Ys.append(tempYs[i])
-        else:
-            for i in xrange(0, len(tempXs)):
-                if (tempXs[i] % self.__Scale == 0 and tempYs[i] % self.__Scale == 0):
-                    Xs.append(tempXs[i])
-                    Ys.append(tempYs[i])
+            if (tempXs[i] % self.__Scale == 0 and tempYs[i] % self.__Scale == 0):
+                Xs.append(tempXs[i])
+                Ys.append(tempYs[i])
 
         #Plot the points
         for i in xrange(0, len(Xs)):
             try:
-                self.Plot[(int)(Xs[i])][(int)(Ys[i]) - 1] = MemoryType.Visited #quick hack
+                self.Plot[(int)(Xs[i])][(int)(Ys[i])] = MemoryType.Visited
             except IndexError:
                 print("Error: Ran out of space. Expanding the plot.\r\n")
                 self.ExpandPlot(5, 5)
@@ -314,9 +308,10 @@ class RobotMemory:
         if (stretch >= 0):
             try:
                 self.__X = Xs[len(Xs) - 1]
-                self.__Y = Ys[len(Ys) - 1] - 1 #quick hack
+                self.__Y = Ys[len(Ys) - 1]
             except IndexError:
                 print("Error: No measurable progression.\r\n")
+                return
 
         else:
             try:
@@ -324,6 +319,7 @@ class RobotMemory:
                 self.__Y = Ys[0] #quick hack
             except IndexError:
                 print("Error: No measurable progression.\r\n")
+                return
 
         #add it to the direction TODO: Correct
         self.__TowardsX = maxAmount
@@ -346,7 +342,7 @@ class RobotMemory:
     #Gets the current slope
     def getSlope(self):
         if (self.__TowardsX - self.__X == 0):
-            return float("nan")
+            return float("inf")
         else:
             return (self.__TowardsY - self.__Y) / (self.__TowardsX - self.__X)
 
@@ -364,15 +360,15 @@ class RobotMemory:
         return nearby
 
     def getPointAtPosition(self, x, y):
-        return mem.Plot[x + self.__MidpointX, y + self.__MidpointY]
+        return mem.Plot[x + (int)(self.__MidpointX)][y + (int)(self.__MidpointY)]
 
 print ("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n")
 sim = Myro.Simulation("test", 250, 250, Myro.Color("White"))
 r = Myro.makeRobot("SimScribbler", sim)
 r.setPose(125, 125, -90)
-mem = RobotMemory(3, 20, 20, 1, 1, 1, 0)
+mem = RobotMemory(3, 20, 20, 1, 1, 0, 1)
 mem.start(0, 0)
 print (mem.getPosition())
-mem.curve(.25, 1, 4)
+mem.curve(.5, 1, 4)
 print (mem.getPosition())
 print(mem.Plot)
