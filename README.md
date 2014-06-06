@@ -26,6 +26,7 @@ Modifying methods
 | `goForward`   | Moves bot forward  | `duration`                                                                   |
 | `turn`        | Turns the bot      | `degrees`                                                                    |
 | `curve`       | Curves the bot     | `motorLeft, motorRight, duration`                                            |
+| `expandPlot`  | Expands the plot   | `radius`
 -----------------------------------------------------------------------------------------------------------------------
 
 Retrieving methods

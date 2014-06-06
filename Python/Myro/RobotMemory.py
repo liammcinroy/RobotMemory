@@ -60,15 +60,6 @@ class RobotMemory:
 
         Myro.init("COM" + str(comPort))
 
-    #Expands the array
-    def expandPlot(self, x, y):
-        for i in xrange(len(self.Plot)):
-            for j in xrange(x * (1 / self.__Scale)):
-                self.Plot[i].append(MemoryType.Unknown)
-        addArray = self.Plot[0]
-        for j in xrange(y):
-            self.Plot.append(addArray)
-
 
     #set midpoint, and current coordinates
     def start(self, x, y):
@@ -142,7 +133,7 @@ class RobotMemory:
                             self.Plot[(int) (self.__X)][y] = MemoryType.Visited
                         except IndexError:
                             print("Error: Ran out of space. Expanding the plot\r\n")
-                            self.ExpandPlot(0, 5)
+                            self.ExpandPlot(5)
                             y -= 1
 
                 #increase y
@@ -162,7 +153,7 @@ class RobotMemory:
                             self.Plot[(int) (self.__X)][y] = MemoryType.Visited
                         except IndexError:
                             print("Error: Ran out of space. Expanding the plot\r\n")
-                            self.ExpandPlot(0, 5)
+                            self.ExpandPlot(5)
                             y -= 1
 
                 #increase y
@@ -219,7 +210,7 @@ class RobotMemory:
                 self.Plot[Xs[i]][Ys[i]] = MemoryType.Visited
             except IndexError:
                 print("Error: Ran out of space. Expanding the plot.\r\n")
-                self.ExpandPlot(5, 5)
+                self.ExpandPlot(5)
                 i -= 1
 
         multiplyBy = 1.0 / self.__Scale
@@ -322,7 +313,7 @@ class RobotMemory:
                 self.Plot[int(Xs[i])][int(Ys[i])] = MemoryType.Visited
             except IndexError:
                 print("Error: Ran out of space. Expanding the plot.\r\n")
-                self.ExpandPlot(5, 5)
+                self.ExpandPlot(5)
                 i -= 1
 
         multiplyBy = 1.0 / self.__Scale
@@ -392,6 +383,7 @@ class RobotMemory:
         else:
             return (self.__TowardsY - self.__Y) / (self.__TowardsX - self.__X)
 
+    #gets nearby cells
     def getNearby(self, radius):
         radius *= (int) (1.0 / self.__Scale)
         nearby = []
@@ -405,8 +397,24 @@ class RobotMemory:
             nearby.append(row)
         return nearby
 
+    #gets point at position
     def getPointAtPosition(self, x, y):
         return mem.Plot[x + int(self.__MidpointX)][y + int(self.__MidpointY)]
+
+    #Expands the array
+    def expandPlot(self, radius):
+        topBottom = [MemoryType.Unknown for height in xrange(len(self.Plot))]
+        dupe = self.Plot
+        self.Plot = []
+        for i in xrange(radius):
+            self.Plot.append(topBottom)
+        for i in xrange(radius - 1, len(dupe)):
+            temp = [MemoryType.Unknown for width in xrange(radius)]
+            temp.extend(dupe[i])
+            temp.extend([MemoryType.Unknown for width in xrange(radius)])
+            self.Plot.append(temp)
+        for i in xrange(radius):
+            self.Plot.append(topBottom)
 
 print ("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n")
 sim = Myro.Simulation("test", 250, 250, Myro.Color("White"))
