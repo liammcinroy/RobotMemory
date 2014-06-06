@@ -21,7 +21,7 @@ Modifying methods
 
 | Name          | Purpose            | Parameters                                                                   |
 |---------------|--------------------|------------------------------------------------------------------------------|
-| `__init__`    | Basic constructor  | `[port, width, height, speed, scale, firstDirectionX, firstDirectionY]`|
+| `__init__`    | Basic constructor  | `[port, width, height, speed, scale, firstDirectionX, firstDirectionY]`      |
 | `start`       | Cretes the plot    | `[startx, starty]`                                                           |
 | `goForward`   | Moves bot forward  | `duration`                                                                   |
 | `turn`        | Turns the bot      | `degrees`                                                                    |
@@ -36,4 +36,5 @@ Retrieving methods
 | `getPosition`   | Gets the plot position | _none_                                                                   |
 | `getSlope`      | Gets the plot slope    | _none_                                                                   |
 | `getNearby`     | Gets the nearby cells  |`radius`                                                                  |
+| `getPointAtPosition` | Gets the point at position | `x, y`
 -----------------------------------------------------------------------------------------------------------------------

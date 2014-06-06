@@ -93,18 +93,20 @@ class RobotMemory:
         left = 0
 
         if (theta > 0):
-            left = 1
+            left = 0
 
-        if (left == 1):
+        if (left == 0):
             Myro.robot.turnLeft(time, abs(self.Speed))
         else:
             Myro.robot.turnRight(time, abs(self.Speed))
 
+        #get true angle
         if (self.getSlope == 0):
             if (self.__TowardsX < self.__X):
                 theta = 180 - theta
         else:
             theta = degrees(atan(self.getSlope())) - theta
+
         #get rotation values
         theta *= (pi / 180)
         sina = sin(theta)
@@ -113,13 +115,6 @@ class RobotMemory:
         #origin points
         pX = self.__TowardsX - self.__X
         pY = self.__TowardsY - self.__Y
-
-        #apply rotation
-        if (left == 0):
-            #reflect across X axis
-            self.__TowardsX = -(cosa * pX - sina * pY) + self.__X
-            self.__TowardsY = (sina * pX + cosa * pY) + self.__Y
-            return
 
         self.__TowardsX = (cosa * pX - sina * pY) + self.__X
         self.__TowardsY = (sina * pX + cosa * pY) + self.__Y
@@ -250,8 +245,6 @@ class RobotMemory:
         #set temp
         tempX = self.__X
         tempY = self.__Y
-
-
 
         #set scale
         greaterSpeed = 0
@@ -421,9 +414,3 @@ r = Myro.makeRobot("SimScribbler", sim)
 r.setPose(125, 125, -90)
 mem = RobotMemory(3, 20, 20, 1, 1, 0, 1)
 mem.start(0, 0)
-mem.curve(.5, 1, 4)
-mem.goForward(2)
-mem.turn(45)
-mem.goForward(3)
-print (mem.getPosition())
-print(mem.Plot)
